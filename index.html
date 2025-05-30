@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>My To-Do List</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    ul {
+      padding-left: 0;
+      list-style-type: none;
+    }
+
+    li {
+      background: #f3f3f3;
+      margin: 5px 0;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>To-Do List</h1>
+
+  <form id="taskForm">
+    <input type="text" id="taskInput" placeholder="Enter a task" required />
+    <button type="submit">Add Task</button>
+  </form>
+
+  <ul id="taskList"></ul>
+
+  <script>
+    // TEMPORARY placeholder API URL – we will update this in Step 3
+    const API_URL = 'https://your-cloud-function-url/tasks';
+
+    // Load tasks from the backend
+    async function loadTasks() {
+      try {
+        const response = await fetch(API_URL);
+        const tasks = await response.json();
+
+        const list = document.getElementById('taskList');
+        list.innerHTML = '';
+
+        tasks.forEach(task => {
+          const item = document.createElement('li');
+          item.textContent = task.text;
+          list.appendChild(item);
+        });
+      } catch (error) {
+        console.error('Error loading tasks:', error);
+      }
+    }
+
+    // Submit form to add a new task
+    document.getElementById('taskForm').addEventListener('submit', async function (event) {
+      event.preventDefault();
+      const taskInput = document.getElementById('taskInput');
+      const taskText = taskInput.value.trim();
+
+      if (taskText !== '') {
+        try {
+          await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: taskText })
+          });
+
+          taskInput.value = '';
+          loadTasks();
+        } catch (error) {
+          console.error('Error adding task:', error);
+        }
+      }
+    });
+
+    // Load tasks when the page first opens
+    loadTasks();
+  </script>
+</body>
+</html>
